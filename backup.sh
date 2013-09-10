@@ -19,10 +19,12 @@ logline () {
 }
 
 # Print initial script start time
-echo "Backup of $HOSTNAME starting at $TIME" >> $BACKUPLOG
+logline "Backup of $HOSTNAME starting at $TIME" >> $BACKUPLOG
 
 # Create required directories and such
-mkdir $BACKUPDIR/$HOSTNAME-$DATE
+if [ ! -f "$ARMOUNT" ]; then
+  mkdir $BACKUPDIR/$HOSTNAME-$DATE
+fi
 cd $BACKUPDIR
 
 # Keep four backups total, and remove anything older

@@ -51,11 +51,13 @@ rsync $RSYNCOPTS /* $BACKUPDIR/$HOSTNAME-$DATE --exclude dev/* \
   --exclude var/lib/pacman/sync/*
 
 # Convert the directory to an xz archive for space purposes
-logline "Starting the compression operation for $HOSTNAME" >> $BACKUPLOG
-cd $BACKUPDIR
-tar -c --xz -f $HOSTNAME-$DATE.tar.xz $HOSTNAME-$DATE
-rm -rf $HOSTNAME-$DATE
+if [ ! -f "$ARMOUNT" ]; then
+  logline "Starting the compression operation for $HOSTNAME" >> $BACKUPLOG
+  cd $BACKUPDIR
+  tar -c --xz -f $HOSTNAME-$DATE.tar.xz $HOSTNAME-$DATE
+  rm -rf $HOSTNAME-$DATE
+fi
 
 # Return the total time from rsync to tar completion
 FINISH=$(date +%s)
-logline "Backup of $HOSTNAME complete.  Total run time: $(( ($FINISH-$START) / 60 )) minutes, $(( ($FINISH-$START) % 60 )) seconds"
+logline "Backup of $HOSTNAME complete.  Total run time: $(( ($FINISH-$START) / 60 )) minutes, $(( ($FINISH-$START) % 60 )) seconds" >> $BACKUPLOG

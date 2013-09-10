@@ -11,6 +11,7 @@ DATE=`date +"%Y%m%d"`
 BACKUPDIR=/mnt/backup
 BACKUPLOG=$BACKUPDIR/$HOSTNAME-$DATE.log
 RSYNCOPTS="-aAXv --progress"
+ARMOUNT=`which archivemount`
 
 # Print initial script start time
 echo "Backup of $HOSTNAME starting at $TIME" >> $BACKUPLOG
@@ -23,10 +24,21 @@ cd $BACKUPDIR
 echo "Removing old backups for $HOSTNAME" >> $BACKUPLOG
 ls -t ${HOSTNAME}*.tar.xz | sed -e '1,3d' | xargs -d '\n' rm
 
+# If archivemount is found, create an empty tarball for use
+if [ -f "$ARMOUNT" ]; then
+  echo "$ARMOUNT found, using direct .tar.xz writing."
+  echo "Creating empty $HOSTNAME-$DATE.tar.xz file for writing..."
+  tar -c --xz -f $HOSTNAME-$DATE.tar.xz -T /dev/null
+  exit 0
+fi
+
 # Start the rsync operation
 echo "Starting the rsync operation for $HOSTNAME" >> $BACKUPLOG
 START=$(date +%s)
-rsync $RSYNCOPTS /* $BACKUPDIR/$HOSTNAME-$DATE --exclude dev/* --exclude proc/* --exclude sys/* --exclude tmp/* --exclude run/* --exclude mnt/* --exclude media/* --exclude lost+found --exclude var/lib/pacman/sync/*
+rsync $RSYNCOPTS /* $BACKUPDIR/$HOSTNAME-$DATE --exclude dev/* \
+  --exclude proc/* --exclude sys/* --exclude tmp/* --exclude run/* \
+  --exclude mnt/* --exclude media/* --exclude lost+found \
+  --exclude var/lib/pacman/sync/*
 
 # Convert the directory to an xz archive for space purposes
 echo "Starting the compression operation for $HOSTNAME" >> $BACKUPLOG

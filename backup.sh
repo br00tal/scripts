@@ -50,7 +50,7 @@ START=$(date +%s)
 rsync $RSYNCOPTS /* $BACKUPDIR/$HOSTNAME-$DATE --exclude dev/* \
   --exclude proc/* --exclude sys/* --exclude tmp/* --exclude run/* \
   --exclude mnt/* --exclude media/* --exclude lost+found \
-  --exclude var/lib/pacman/sync/*
+  --exclude var/lib/pacman/sync/* --exclude= var/cache/pacman/pkg/*
 
 # Convert the directory to an xz archive for space purposes
 logline "Starting the compression operation for $HOSTNAME" >> $BACKUPLOG

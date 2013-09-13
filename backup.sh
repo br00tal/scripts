@@ -15,6 +15,9 @@ RSYNCOPTS="-aAXv --progress"
 # Compression method.  Valid values are xz, bzip2, and gzip.
 COMP="xz"
 
+# How many backups do you want to keep?
+KEEP="3"
+
 if [ "$COMP" == "xz" ]; then
   EXT="xz"
 elif [ "$COMP" == "bzip2" ]; then
@@ -39,10 +42,16 @@ mkdir $BACKUPDIR/$HOSTNAME-$DATE
 cd $BACKUPDIR
 
 # Keep four backups total, and remove anything older
-logline "Removing old backups for $HOSTNAME" >> $BACKUPLOG
-ls -t ${HOSTNAME}*.tar.$EXT | sed -e '1,3d' | xargs -d '\n' rm > /dev/null 2>&1
-logline "Removing old logs for $HOSTNAME" >> $BACKUPLOG
-ls -t ${HOSTNAME}*.log | sed -e '1,3d' | xargs -d '\n' rm > /dev/null 2>&1
+BACKUPCOUNT=`ls ${HOSTNAME}*.tar.$EXT | wc -l`
+if [ "$BACKUPCOUNT" -gt "$KEEP" ]; then
+  logline "Removing old backups for $HOSTNAME" >> $BACKUPLOG
+  ls -t ${HOSTNAME}*.tar.$EXT | sed -e "1,${KEEP}d" | xargs -d '\n' rm
+fi
+LOGCOUNT=`ls ${HOSTNAME}*.log | wc -l`
+if [ "$LOGCOUNT" -gt "$KEEP" ]; then
+  logline "Removing old logs for $HOSTNAME" >> $BACKUPLOG
+  ls -t ${HOSTNAME}*.log | sed -e "1,${KEEP}d" | xargs -d '\n' rm
+fi
 
 # Start the rsync operation
 logline "Starting the rsync operation for $HOSTNAME" >> $BACKUPLOG
@@ -50,7 +59,8 @@ START=$(date +%s)
 rsync $RSYNCOPTS /* $BACKUPDIR/$HOSTNAME-$DATE --exclude dev/* \
   --exclude proc/* --exclude sys/* --exclude tmp/* --exclude run/* \
   --exclude mnt/* --exclude media/* --exclude lost+found \
-  --exclude var/lib/pacman/sync/* --exclude= var/cache/pacman/pkg/*
+#  --exclude var/lib/pacman/sync/* --exclude auto/*
+  --exclude var/lib/pacman/sync/* --exclude var/cache/pacman/pkg/*
 
 # Convert the directory to an xz archive for space purposes
 logline "Starting the compression operation for $HOSTNAME" >> $BACKUPLOG
@@ -60,5 +70,5 @@ rm -rf $HOSTNAME-$DATE
 
 # Return the total time from rsync to tar completion
 FINISH=$(date +%s)
-logline "Backup of $HOSTNAME complete.  Total run time: $(( ($FINISH-$START) / 60 )) minutes, $(( ($FINISH-$START) % 60 )) seconds" >> $BACKUPLOG
+logline "Backup of $HOSTNAME complete.  Total run time: $(( ($FINISH-$START) / 60 )) minutes, $(( ($FINISH-$START) % 60 )) seconds." >> $BACKUPLOG
 

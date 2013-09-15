@@ -41,16 +41,17 @@ logline "Backup of $HOSTNAME starting..." >> $BACKUPLOG
 mkdir $BACKUPDIR/$HOSTNAME-$DATE
 cd $BACKUPDIR
 
-# Keep four backups total, and remove anything older
+# Keep <n> backups total, and remove anything older
+DELCOUNT=$(($KEEP - 1))
 BACKUPCOUNT=`ls ${HOSTNAME}*.tar.$EXT | wc -l`
 if [ "$BACKUPCOUNT" -gt "$KEEP" ]; then
   logline "Removing old backups for $HOSTNAME" >> $BACKUPLOG
-  ls -t ${HOSTNAME}*.tar.$EXT | sed -e "1,${KEEP}d" | xargs -d '\n' rm
+  ls -t ${HOSTNAME}*.tar.$EXT | sed -e "1,${DELCOUNT}d" | xargs -d '\n' rm
 fi
 LOGCOUNT=`ls ${HOSTNAME}*.log | wc -l`
 if [ "$LOGCOUNT" -gt "$KEEP" ]; then
   logline "Removing old logs for $HOSTNAME" >> $BACKUPLOG
-  ls -t ${HOSTNAME}*.log | sed -e "1,${KEEP}d" | xargs -d '\n' rm
+  ls -t ${HOSTNAME}*.log | sed -e "1,${DELCOUNT}d" | xargs -d '\n' rm
 fi
 
 # Start the rsync operation

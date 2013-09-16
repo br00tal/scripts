@@ -48,9 +48,9 @@ read -e LOC
 cp "$LOC"/*.mp3 $BURNDIR/
 cd $BURNDIR
 IFS=$(echo)
-for i in *.mp3; do
-	CDR=`basename "$i" .mp3`
-	mpg123 -w $CDR.wav $i
+for j in *.mp3; do
+	CDR=`basename "$j" .mp3`
+	mpg123 -w $CDR.wav $j
 done
 
 unset IFS

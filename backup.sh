@@ -44,12 +44,12 @@ cd $BACKUPDIR
 # Keep <n> backups total, and remove anything older
 DELCOUNT=$(($KEEP - 1))
 BACKUPCOUNT=`ls ${HOSTNAME}*.tar.$EXT | wc -l`
-if [ "$BACKUPCOUNT" -gt "$KEEP" ]; then
+if [ "$BACKUPCOUNT" -ge "$KEEP" ]; then
   logline "Removing old backups for $HOSTNAME" >> $BACKUPLOG
   ls -t ${HOSTNAME}*.tar.$EXT | sed -e "1,${DELCOUNT}d" | xargs -d '\n' rm
 fi
 LOGCOUNT=`ls ${HOSTNAME}*.log | wc -l`
-if [ "$LOGCOUNT" -gt "$KEEP" ]; then
+if [ "$LOGCOUNT" -ge "$KEEP" ]; then
   logline "Removing old logs for $HOSTNAME" >> $BACKUPLOG
   ls -t ${HOSTNAME}*.log | sed -e "1,${DELCOUNT}d" | xargs -d '\n' rm
 fi
@@ -60,7 +60,6 @@ START=$(date +%s)
 rsync $RSYNCOPTS /* $BACKUPDIR/$HOSTNAME-$DATE --exclude dev/* \
   --exclude proc/* --exclude sys/* --exclude tmp/* --exclude run/* \
   --exclude mnt/* --exclude media/* --exclude lost+found \
-#  --exclude var/lib/pacman/sync/* --exclude auto/*
   --exclude var/lib/pacman/sync/* --exclude var/cache/pacman/pkg/*
 
 # Convert the directory to an xz archive for space purposes

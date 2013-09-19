@@ -51,7 +51,7 @@ fi
 LOGCOUNT=`ls ${HOSTNAME}*.log | wc -l`
 if [ "$LOGCOUNT" -ge "$KEEP" ]; then
   logline "Removing old logs for $HOSTNAME" >> $BACKUPLOG
-  ls -t ${HOSTNAME}*.log | sed -e "1,${DELCOUNT}d" | xargs -d '\n' rm
+  ls -t ${HOSTNAME}*.log | sed -e "1,${KEEP}d" | xargs -d '\n' rm
 fi
 
 # Start the rsync operation

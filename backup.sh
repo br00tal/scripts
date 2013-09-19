@@ -70,5 +70,7 @@ rm -rf $HOSTNAME-$DATE
 
 # Return the total time from rsync to tar completion
 FINISH=$(date +%s)
-logline "Backup of $HOSTNAME complete.  Total run time: $(( ($FINISH-$START) / 60 )) minutes, $(( ($FINISH-$START) % 60 )) seconds." >> $BACKUPLOG
+logline "Backup of $HOSTNAME complete.  Total run time: \
+$(( ($FINISH-$START) / 60 )) minutes, $(( ($FINISH-$START) % 60 )) \
+seconds." >> $BACKUPLOG
 

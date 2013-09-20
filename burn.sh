@@ -20,22 +20,43 @@ usage: $0 options
 Specify only one option at a time.
 
 Options:
-  -h   Shows this help message
   -f   Burn flac files
   -m   Burn mp3 files
   -w   Burn wav files
 EOF
 }
 
-while getopts "hfmw" OPTION; do
+# Need an argument.  Exit if nothing.
+if [ "X$1" == "X" ]; then
+  echo "No option specified."
+  usage
+  exit 1
+fi
+
+isFLAC="false"
+isMP3="false"
+isWAV="false"
+
+while getopts "fmw" OPTION; do
   case $OPTION in
-    h ) usage; exit 1;;
-    f ) TYPE="FLAC";;
-    m ) TYPE="MP3";;
-    w ) TYPE="WAV";;
+    f ) TYPE="FLAC"; isFLAC="true";;
+    m ) TYPE="MP3"; isMP3="true";;
+    w ) TYPE="WAV"; isWAV="true";;
     * ) usage; exit 1;;
   esac
 done
+
+# Make sure we are using only one option at a time.
+if [ "$isFLAC" == "true" -a "$isMP3" == "true" ]; then
+  echo "-f and -m are exclusive.  Please only specify one argument at a time."
+  exit 1
+elif [ "$isFLAC" == "true" -a "$isWAV" == "true" ]; then
+  echo "-f and -w are exclusive.  Please only specify one argument at a time."
+  exit 1
+elif [ "$isMP3" == "true" -a "$isWAV" == "true" ]; then
+  echo "-m and -w are exclusive.  Please only specify one argument at a time."
+  exit 1
+fi
 
 # Logic if we are to attempt CD-ROM auto-detection.
 if [ "X$DEVICE" == "X" ]; then

@@ -4,19 +4,25 @@
 # Written by br00tal
 #
 
-# Variables
-HOSTNAME=`hostname`
-TIME=`date`
-DATE=`date +"%Y%m%d"`
-BACKUPDIR=/mnt/backup
-BACKUPLOG=$BACKUPDIR/$HOSTNAME-$DATE.log
-RSYNCOPTS="-aAXv --progress"
+# Directories to *exclude* during backups.
+DIRS="/dev /proc /sys /tmp /run /mnt /media /lost+found /var/lib/pacman/sync \
+/var/cache/pacman/pkg /auto"
 
 # Compression method.  Valid values are xz, bzip2, and gzip.
 COMP="xz"
 
 # How many backups do you want to keep?
 KEEP="3"
+
+# Where to save the backups to.
+BACKUPDIR=/mnt/backup
+
+# You shouldn't really need to change the below variables.
+HOSTNAME=`hostname`
+TIME=`date`
+DATE=`date +"%Y%m%d"`
+BACKUPLOG=$BACKUPDIR/$HOSTNAME-$DATE.log
+RSYNCOPTS="-aAXv --progress"
 
 if [ "$COMP" == "xz" ]; then
   EXT="xz"
@@ -49,18 +55,24 @@ if [ "$BACKUPCOUNT" -ge "$KEEP" ]; then
   ls -t ${HOSTNAME}*.tar.$EXT | sed -e "1,${DELCOUNT}d" | xargs -d '\n' rm
 fi
 LOGCOUNT=`ls ${HOSTNAME}*.log | wc -l`
-if [ "$LOGCOUNT" -ge "$KEEP" ]; then
+if [ "$LOGCOUNT" -gt "$KEEP" ]; then
   logline "Removing old logs for $HOSTNAME" >> $BACKUPLOG
   ls -t ${HOSTNAME}*.log | sed -e "1,${KEEP}d" | xargs -d '\n' rm
 fi
 
+# Convert excluded directories to rsync format.
+EXCLUDE=()
+EXCOUNT=0
+for z in $DIRS; do
+  DIR=`echo $z | cut -c 2-`
+  EXCLUDE[$EXCOUNT]=`echo "--exclude $DIR/*"`
+  EXCOUNT=$(( $EXCOUNT + 1 ))
+done
+
 # Start the rsync operation
 logline "Starting the rsync operation for $HOSTNAME" >> $BACKUPLOG
 START=$(date +%s)
-rsync $RSYNCOPTS /* $BACKUPDIR/$HOSTNAME-$DATE --exclude dev/* \
-  --exclude proc/* --exclude sys/* --exclude tmp/* --exclude run/* \
-  --exclude mnt/* --exclude media/* --exclude lost+found \
-  --exclude var/lib/pacman/sync/* --exclude var/cache/pacman/pkg/*
+rsync $RSYNCOPTS /* $BACKUPDIR/$HOSTNAME-$DATE ${EXCLUDE[@]}
 
 # Convert the directory to an xz archive for space purposes
 logline "Starting the compression operation for $HOSTNAME" >> $BACKUPLOG

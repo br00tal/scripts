@@ -17,6 +17,14 @@ ip_provider = full_config['ip_provider']
 subdomains = full_config['subdomains']
 ttl = full_config['ttl']
 
+# This function writes timestamped output
+def logline(message)
+  t = Time.now.strftime('%Y-%m-%d %H:%M:%S')
+  puts '[' + t + '] ' + message
+end
+
+logline("START #{__FILE__}")
+
 # Get the public IP address
 public_ip = Net::HTTP.get URI ip_provider
 
@@ -28,11 +36,10 @@ a_records = api.get("/v1/domains/#{domain}/records/A")
 
 # Check the A records against our managed list, and update if necessary
 a_records.each do |a|
-  puts a['data']
   if subdomains.include? a['name']
-    puts "#{a['name']} is set to be managed, comparing IPs..."
+    logline " #{a['name']} is set to be managed, comparing IPs..."
     if a['data'] != public_ip
-      puts "#{a['name']} is #{a['data']}, not #{public_ip}, updating it..."
+      logline " #{a['name']} is #{a['data']}, not #{public_ip}, updating it..."
       api.put(
         "/v1/domains/#{domain}/records/A/#{a['name']}",
         [
@@ -45,12 +52,14 @@ a_records.each do |a|
         ]
       )
     elsif a['data'] == public_ip
-      puts "#{a['name']}'s IPs match, doing nothing..."
+      logline " #{a['name']}'s IPs match, doing nothing..."
     else
-      puts 'Something strange happened, exiting...'
+      logline ' Something strange happened, exiting...'
       exit 1
     end
   else
-    puts "#{a['name']} is not managed, skipping..."
+    logline " #{a['name']} is not managed, skipping..."
   end
 end
+
+logline("END #{__FILE__}")

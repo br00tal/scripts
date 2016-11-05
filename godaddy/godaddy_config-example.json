@@ -3,6 +3,8 @@
   "api_secret": "api_secret_goes_here",
   "domain": "example.com",
   "ip_provider": "https://api.ipify.org",
+  "pushover_user_token": "your_user_token",
+  "pushover_app_token": "your_app_token",
   "subdomains": [
     "sub1",
     "www"

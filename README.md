@@ -1,13 +1,3 @@
-scripts
-=======
-
-Various simple scripts, etc.
-
-godaddy
--------
-
-Updates A records via the GoDaddy API.
-
 backup.sh
 ---------
 
@@ -17,6 +7,21 @@ burn scripts
 ------------
 
 These scripts burn various file formats to CD and DVD.
+
+godaddy
+-------
+
+Updates A records via the GoDaddy API.
+
+irc_search
+----------
+
+Searches WeeChat logs for specified strings and nicks.
+
+scripts
+=======
+
+Various simple scripts, etc.
 
 install.sh
 ----------

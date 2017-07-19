@@ -1,3 +1,10 @@
+scripts
+=======
+
+Various simple scripts, etc.
+
+
+
 backup.sh
 ---------
 
@@ -17,11 +24,6 @@ irc_search
 ----------
 
 Searches WeeChat logs for specified strings and nicks.
-
-scripts
-=======
-
-Various simple scripts, etc.
 
 install.sh
 ----------

@@ -46,13 +46,15 @@ wc_logs_clean.each do |file|
     log_file = infile
   end
   log_file.each_line do |line|
+    l = line.downcase
+    n = options['nick'].downcase
+    s = options['string'].downcase
     if options['nick']
       nick_search = line.split(' ')
-      if (nick_search[2] =~ /#{options['nick']}/) && (line.include? options['string'])
-        matches.push(line)
-      end
+      ns = nick_search[2].to_s.downcase
+      matches.push(line) if (ns =~ /#{n}/) && (l.include? s)
     else
-      matches.push(line) if line.include? options['string']
+      matches.push(line) if l.include? s
     end
   end
 end

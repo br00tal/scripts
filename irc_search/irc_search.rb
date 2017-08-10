@@ -12,9 +12,16 @@ matches = []
 
 # Set up the options parser
 helptext = nil
-options = { 'nick' => nil, 'string' => nil }
+options = {
+  'network' => nil,
+  'nick' => nil,
+  'string' => nil
+}
 parser = OptionParser.new do |opts|
   opts.banner = 'Usage: irc_search.rb [options] <search term>'
+  opts.on('-i', '--irc-network network', 'irc network') do |network|
+    options['network'] = network
+  end
   opts.on('-n', '--nick nick', 'user\'s irc nick') do |nick|
     options['nick'] = nick
   end
@@ -38,6 +45,9 @@ end
 
 # Loop through the files and grab lines matching the search term
 wc_logs_clean.each do |file|
+  if options['network']
+    next unless file.downcase.include? options['network'].downcase
+  end
   mtype = MimeMagic.by_magic(File.open(file))
   infile = open(file)
   if mtype == 'application/gzip'
@@ -47,9 +57,9 @@ wc_logs_clean.each do |file|
   end
   log_file.each_line do |line|
     l = line.downcase
-    n = options['nick'].downcase
     s = options['string'].downcase
     if options['nick']
+      n = options['nick'].downcase
       nick_search = line.split(' ')
       ns = nick_search[2].to_s.downcase
       matches.push(line) if (ns =~ /#{n}/) && (l.include? s)
